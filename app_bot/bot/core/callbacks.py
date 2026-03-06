@@ -2,10 +2,12 @@ import logging
 
 from pyrogram.enums import ParseMode
 from pyrogram.types import Message
+from yt_shared.db.session import get_db
 from yt_shared.emoji import SUCCESS_EMOJI
+from yt_shared.repositories.ytdlp import YtdlpRepository
 
 from bot.bot.client import VideoBotClient
-from bot.core.service import UrlParser, UrlService
+from bot.core.service import UrlParser, UrlService, YtdlpService
 from bot.core.utils import bold, get_user_id
 
 
@@ -23,7 +25,41 @@ class TelegramCallback:
     @staticmethod
     async def on_start(client: VideoBotClient, message: Message) -> None:  # noqa: ARG004
         await message.reply(
-            bold('Send video URL to start processing'),
+            bold('Send video URL to start processing\n\nCommands: /yt-check, /yt-update'),
+            parse_mode=ParseMode.HTML,
+            reply_to_message_id=message.id,
+        )
+
+    async def on_yt_check(self, client: VideoBotClient, message: Message) -> None:
+        text = 'Failed to load yt-dlp status'
+        async for db in get_db():
+            service = YtdlpService(
+                repository=YtdlpRepository(db),
+                release_channel=client.conf.ytdlp.release_channel,
+            )
+            ctx = await service.get_version_context()
+            text = service.format_check_text(ctx)
+            break
+
+        await message.reply(
+            text,
+            parse_mode=ParseMode.HTML,
+            reply_to_message_id=message.id,
+        )
+
+    async def on_yt_update(self, client: VideoBotClient, message: Message) -> None:
+        text = 'Failed to load yt-dlp status'
+        async for db in get_db():
+            service = YtdlpService(
+                repository=YtdlpRepository(db),
+                release_channel=client.conf.ytdlp.release_channel,
+            )
+            ctx = await service.get_version_context()
+            text = service.format_update_text(ctx)
+            break
+
+        await message.reply(
+            text,
             parse_mode=ParseMode.HTML,
             reply_to_message_id=message.id,
         )

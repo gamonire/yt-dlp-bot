@@ -50,6 +50,18 @@ class BotLauncher:
         )
         self._bot.add_handler(
             MessageHandler(
+                cb.on_yt_check,
+                filters=filters.user(allowed_users) & filters.command(['yt-check']),
+            )
+        )
+        self._bot.add_handler(
+            MessageHandler(
+                cb.on_yt_update,
+                filters=filters.user(allowed_users) & filters.command(['yt-update']),
+            )
+        )
+        self._bot.add_handler(
+            MessageHandler(
                 cb.on_message,
                 filters=(
                     filters.regex(self.REGEX_NOT_START_WITH_SLASH)
