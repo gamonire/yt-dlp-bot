@@ -71,6 +71,10 @@ Your Telegram Bot should send you a startup message:
 pasting video URL(s) bot will send you appropriate message whether they were downloaded
 or something went wrong.
 
+Additional bot commands for yt-dlp version checks:
+- `/yt-check` — check current worker yt-dlp version against latest release.
+- `/yt-update` — show update instructions if a new version is available.
+
 ## 💻 Advanced setup
 
 1. If you want to change `yt-dlp` download options, go to the `app_worker/ytdl_opts`
