@@ -1,4 +1,4 @@
-from pydantic import DirectoryPath, field_validator
+from pydantic import DirectoryPath, PositiveInt, field_validator
 from yt_shared.config import CommonSettings
 
 
@@ -10,6 +10,8 @@ class WorkerSettings(CommonSettings):
     INSTAGRAM_ENCODE_TO_H264: bool
     FACEBOOK_ENCODE_TO_H264: bool
     MAX_DOWNLOAD_THREADS: str
+    YTDLP_AUTO_UPDATE_ENABLED: bool = True
+    YTDLP_AUTO_UPDATE_INTERVAL_SECONDS: PositiveInt = 21600
 
     @field_validator('MAX_DOWNLOAD_THREADS')
     @classmethod

@@ -54,8 +54,11 @@ class MediaDownloader:
         url = host_conf.url
         self._log.info('Downloading %s, media_type %s', url, media_type)
         tmp_down_path = settings.TMP_DOWNLOAD_ROOT_PATH / settings.TMP_DOWNLOAD_DIR
+        self._ensure_dir(tmp_down_path)
+        self._ensure_dir(self._tmp_downloaded_dest_dir)
+
         with TemporaryDirectory(prefix='tmp_media_dir-', dir=tmp_down_path) as tmp_dir:
-            curr_tmp_dir = tmp_down_path / tmp_dir
+            curr_tmp_dir = Path(tmp_dir)
 
             ytdl_opts_model = host_conf.build_config(
                 media_type=media_type, curr_tmp_dir=curr_tmp_dir
@@ -90,7 +93,7 @@ class MediaDownloader:
             destination_dir = self._tmp_downloaded_dest_dir / gen_random_str(
                 length=self._DESTINATION_TMP_DIR_NAME_LEN
             )
-            destination_dir.mkdir()
+            destination_dir.mkdir(parents=True, exist_ok=True)
 
             audio, video = self._create_media_dtos(
                 media_type=media_type,
@@ -113,12 +116,16 @@ class MediaDownloader:
             root_path=destination_dir,
         )
 
+    @staticmethod
+    def _ensure_dir(path: Path) -> None:
+        path.mkdir(parents=True, exist_ok=True)
+
     def _create_media_dtos(
         self,
         media_type: DownMediaType,
         meta: dict,
-        curr_tmp_dir: str,
-        destination_dir: str,
+        curr_tmp_dir: Path,
+        destination_dir: Path,
         custom_video_filename: str | None = None,
     ) -> tuple[Audio | None, Video | None]:
         def get_audio() -> Audio:
@@ -128,7 +135,7 @@ class MediaDownloader:
             return create_dto(self._create_video_dto)
 
         def create_dto(
-            func: Callable[[dict, str, str, str | None], Audio | Video],
+            func: Callable[[dict, Path, Path, str | None], Audio | Video],
         ) -> Audio | Video:
             try:
                 return func(meta, curr_tmp_dir, destination_dir, custom_video_filename)
@@ -267,7 +274,6 @@ class MediaDownloader:
                 )
                 return download_obj_copy
         return None
-
     @staticmethod
     def _to_float(duration: float | None) -> float | None:
         try:
